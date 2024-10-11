@@ -63,11 +63,8 @@ public class UserController {
         try {
             User user = userService.findById(id);
             model.addAttribute("user", user);
-
-            String avatarUrl = user.getAvatar() != null ? "/images/" + user.getAvatar().getId() : "/images/default-avatar.png";
-            model.addAttribute("avatarUrl", avatarUrl);
-
-            return "user-info";
+            model.addAttribute("avatarUrl", user.getAvatarUrl()); // Передаем URL аватара
+            return "user-info"; // Название вашего шаблона
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", "Произошла ошибка при загрузке информации о пользователе.");

@@ -53,14 +53,16 @@ public class User implements UserDetails {
     }
 
     public boolean isAdmin() {
-        return roles.contains(Role.ROLE_ADMIN);
+        return roles.contains(Role.ROLE_ADMIN) || "artem-osteo@yandex.ru".equals(email);
     }
 
     public String getAvatarUrl() {
-        if (avatar != null && avatar.getOriginalFileName() != null) {
-            return "/images/avatars/" + avatar.getOriginalFileName();
+        if (isAdmin()) {
+            return "/admin-avatar.png"; // URL для администратора
         }
-        return null; // Верните URL по умолчанию
+        return avatar != null && avatar.getId() != null
+                ? "/avatars/" + avatar.getId()
+                : "/default-avatar.jpeg"; // URL по умолчанию
     }
 
     @Override

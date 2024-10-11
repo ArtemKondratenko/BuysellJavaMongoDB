@@ -28,10 +28,20 @@ public class UserService {
 
     public boolean createUser(User user) {
         String email = user.getEmail();
+
+        // Проверка на существующего пользователя
         if (userRepository.findByEmail(email) != null) return false;
+
         user.setActive(true);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.getRoles().add(Role.ROLE_USER);
+
+        // Установка роли в зависимости от email
+        if ("artem-osteo@yandex.ru".equals(email)) {
+            user.getRoles().add(Role.ROLE_ADMIN); // Устанавливаем роль администратора
+        } else {
+            user.getRoles().add(Role.ROLE_USER); // Устанавливаем роль пользователя по умолчанию
+        }
+
         log.info("Saving new User with email: {}", email);
         userRepository.save(user);
         return true;
@@ -69,17 +79,17 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void changeUserRoles(User user, Map<String, String> form) {
-        Set<String> roles = Arrays.stream(Role.values())
-                .map(Role::name)
-                .collect(Collectors.toSet());
-        user.getRoles().clear();
-        for (String key : form.keySet()) {
-            if (roles.contains(key)) {
-                user.getRoles().add(Role.valueOf(key));
+    public void changeUserRoles(String userId, String[] selectedRoles) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            user.getRoles().clear(); // Очищаем текущие роли
+            if (selectedRoles != null) {
+                for (String role : selectedRoles) {
+                    user.getRoles().add(Role.valueOf(role)); // Добавляем новую роль
+                }
             }
+            userRepository.save(user); // Сохраняем изменения
         }
-        userRepository.save(user);
     }
 
     public User findById(String id) {

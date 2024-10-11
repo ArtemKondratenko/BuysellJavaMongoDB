@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -64,14 +65,35 @@ public class AdminController {
     }
 
     @PostMapping("/admin/user/edit")
-    public String userEdit(@RequestParam("userId") String userId, @RequestParam Map<String, String> form) {
+    public String userEdit(@RequestParam("userId") String userId, @RequestParam Map<String, Object> form) {
         User user = userService.findById(userId);
 
         if (user == null) {
-            return "redirect:/admin"; // Обработка случая, когда пользователь не найден
+            logger.warn("User with ID {} not found.", userId);
+            return "redirect:/admin";
         }
 
-        userService.changeUserRoles(user, form);
+        // Получаем выбранные роли из формы
+        Object selectedRolesObj = form.get("roles");
+        String[] selectedRoles;
+
+        if (selectedRolesObj instanceof String[]) {
+            selectedRoles = (String[]) selectedRolesObj; // Если это массив
+        } else if (selectedRolesObj instanceof String) {
+            selectedRoles = new String[]{(String) selectedRolesObj}; // Если это одиночный элемент
+        } else {
+            selectedRoles = new String[0]; // Если ничего не выбрано
+        }
+
+        logger.info("Selected roles: {}", Arrays.toString(selectedRoles));
+
+        try {
+            userService.changeUserRoles(userId, selectedRoles);
+            logger.info("Roles updated for user ID {}: {}", userId, Arrays.toString(selectedRoles));
+        } catch (Exception e) {
+            logger.error("Failed to update roles for user ID {}: {}", userId, e.getMessage());
+        }
+
         return "redirect:/admin";
     }
 }

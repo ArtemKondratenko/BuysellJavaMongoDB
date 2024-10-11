@@ -89,7 +89,7 @@
         <#if user??>
             <div class="user-info">
                 <div>
-                    <img src="${avatarUrl}" alt="Аватарка пользователя">
+                    <img src="${user.avatarUrl}" alt="Аватарка пользователя">
                     <h3>Имя пользователя: <i>${user.name! 'Гость'}</i></h3>
                 </div>
                 <form action="/logout" method="post" class="logout-form">
